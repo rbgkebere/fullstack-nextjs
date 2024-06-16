@@ -11,15 +11,17 @@ export async function POST(request:NextRequest){
     try {
         const reqBody=await request.json()
         const {username, email, password} = reqBody
-        console.log(reqBody)
+        console.log('ReqBody: '+reqBody)
 
         const user = await User.findOne({email})
 
         if(user){
+            console.log('this user exist!')
             return NextResponse.json(
                 {error:'this user already exist!'},
                 {status:400}
             )
+           
         }
 
         const salt = await bcryptjs.genSalt(10)
@@ -32,7 +34,7 @@ export async function POST(request:NextRequest){
         })
 
         const savedUser = await newUser.save()
-        console.log(savedUser)
+        console.log('saved user: '+savedUser)
 
         return NextResponse.json(
             {

@@ -1,30 +1,54 @@
 'use client'
 
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, {useEffect ,useState } from 'react'
 import { useRouter } from 'next/navigation'
-import {axios} from 'axios'
+import axios from 'axios'
+import toast from 'react-hot-toast'
 
 
 export default function LoginPage() {
-
+    const router = useRouter()
     const [user, setUser] = useState({
         email:'',
         password:'',
     })
 
+    const [loading, setloading]=useState(false)
+    const [buttonDisabled,setbuttonDisabled]=useState(false)
+    
     const onLogin = async ()=>{
 
+        try {
+            console.log('Login clicked')
+            setloading(true)
+            const response = await axios.post('/api/users/login',user)
+            console.log('Login success. This is response.data: ', response.data)
+            toast.success('login success')
+            router.push('/profile')
+        } catch (error:any) {
+            console.log('Login failed', error.message)
+            toast.error(error.message)
+        }finally{
+            setloading(false)
+        }
     }
 
-
-
+    useEffect(()=>{
+        if (user.email.length>0 &&
+            user.password.length>0
+        ){
+            setbuttonDisabled(false)
+        }else{
+            setbuttonDisabled(true)
+        }
+    },[user])
 
   return (
     <div className='flex flex-col items-center justify-center 
                     min-h-screen py-2'>
        
-      <h1>Login</h1>
+       <h1>{loading? 'Loading':'Login'}</h1>
       <hr />
       <label htmlFor='email'>email</label>
       <input 
@@ -51,7 +75,7 @@ export default function LoginPage() {
       <button className='p-2 border border-gray-300 rounded-lg mb-4
       focus:outline-none focus:border-gray-600'
       onClick={onLogin}
-      >Login up</button>
+      >{buttonDisabled?'Fill the form':'Login'}</button>
       <Link href='/signup'>Register here</Link>
     </div>
   )
